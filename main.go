@@ -35,7 +35,7 @@ func main() {
 	hh := handlers.NewHello(l)
 
 	sm := http.NewServeMux()
-	sm.Handle("/test", hh)
+	sm.Handle("/", hh)
 
 	log.Println("Listing for requests at http://localhost:9000/hello")
 	log.Fatal(http.ListenAndServe(":9000", nil))
