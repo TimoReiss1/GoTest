@@ -1,10 +1,13 @@
 package main
 
 import (
+	"context"
 	"log"
-	"main/handlers"
+	"main/work/handlers"
 	"net/http"
 	"os"
+	"os/signal"
+	"time"
 )
 
 func main() {
@@ -30,13 +33,38 @@ func main() {
 		}
 		http.HandleFunc("/bye", goodbyeHandler)
 	*/
-
 	l := log.New(os.Stdout, "product-api", log.LstdFlags)
-	hh := handlers.NewHello(l)
-
+	//hh := handlers.NewHello(l)
+	//gh := handlers.NewBye(l)
+	//sm.Handle("/", hh)
+	//sm.Handle("/goodbye", gh)
+	ph := handlers.NewProducts(l)
 	sm := http.NewServeMux()
-	sm.Handle("/", hh)
+	sm.Handle("/", ph)
 
-	log.Println("Listing for requests at http://localhost:9000/hello")
-	log.Fatal(http.ListenAndServe(":9000", nil))
+	s := &http.Server{
+		Addr:         ":9000",
+		Handler:      sm,
+		IdleTimeout:  120 * time.Second,
+		ReadTimeout:  1 * time.Second,
+		WriteTimeout: 1 * time.Second,
+	}
+
+	log.Println("WebServer started successfully")
+	//http.ListenAndServe(":9000", sm)
+	go func() {
+		err := s.ListenAndServe()
+		if err != nil {
+			l.Fatal(err)
+		}
+	}()
+
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, os.Interrupt)
+	signal.Notify(sigChan, os.Kill)
+
+	sig := <-sigChan
+	l.Println("Received terminate, gracefully shuttingdown.\n Signal Type: ", sig)
+	tc, _ := context.WithTimeout(context.Background(), 30*time.Second)
+	s.Shutdown(tc)
 }
