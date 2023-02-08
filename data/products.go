@@ -24,7 +24,7 @@ func AddProduct(p *Product) {
 }
 
 func UpdateProduct(id int, p *Product) error {
-	p, pos, err := findProductById(id)
+	_, pos, err := findProductById(id)
 	if err != nil {
 		return err
 	}
