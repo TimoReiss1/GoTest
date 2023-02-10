@@ -8,6 +8,8 @@ import (
 	"os"
 	"os/signal"
 	"time"
+
+	"github.com/julienschmidt/httprouter"
 )
 
 func main() {
@@ -39,12 +41,16 @@ func main() {
 	//sm.Handle("/", hh)
 	//sm.Handle("/goodbye", gh)
 	ph := handlers.NewProducts(l)
-	sm := http.NewServeMux()
-	sm.Handle("/", ph)
+	router := httprouter.New()
+	router.GET("/products", ph.GetProducts)
+	router.POST("/products", ph.AddProduct)
+	router.PUT("/products/:id", ph.UpdateProduct)
+	//sm := http.NewServeMux()
+	//sm.Handle("/", ph)
 
 	s := &http.Server{
-		Addr:         ":9000",
-		Handler:      sm,
+		Addr: ":9000",
+		//Handler:      sm,
 		IdleTimeout:  120 * time.Second,
 		ReadTimeout:  1 * time.Second,
 		WriteTimeout: 1 * time.Second,
@@ -65,6 +71,7 @@ func main() {
 
 	sig := <-sigChan
 	l.Println("Received terminate, gracefully shuttingdown.\n Signal Type: ", sig)
-	tc, _ := context.WithTimeout(context.Background(), 30*time.Second)
+	tc, cf := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cf()
 	s.Shutdown(tc)
 }
