@@ -66,7 +66,6 @@ func (p *Products) ToJSON(w io.Writer) error {
 
 func GetProducts() Products {
 	return productList
-
 }
 
 var productList = []*Product{

@@ -1,11 +1,13 @@
 package handlers
 
 import (
+	"database/sql"
 	"log"
 	"main/work/data"
 	"net/http"
 	"regexp"
 	"strconv"
+	"time"
 
 	"github.com/julienschmidt/httprouter"
 )
@@ -14,7 +16,10 @@ type Products struct {
 	l *log.Logger
 }
 
-func NewProducts(l *log.Logger) *Products {
+var apple *sql.DB
+
+func NewProducts(l *log.Logger, db *sql.DB) *Products {
+	apple = db
 	return &Products{l}
 }
 
@@ -106,6 +111,17 @@ func (p *Products) AddProduct(rw http.ResponseWriter, r *http.Request, _ httprou
 	if err == nil {
 		p.l.Printf("Prod: %#v", prod)
 		data.AddProduct(prod)
+		createdOn, err := time.Parse("2006-01-02 15:04:05.999999999 -0700 MST", prod.CreatedOn)
+		if err != nil {
+			log.Fatalf("Error parsing CreatedOn time: %v", err)
+		}
+		updatedOn, err := time.Parse("2006-01-02 15:04:05.999999999 -0700 MST", prod.UpdatedOn)
+		if err != nil {
+			log.Fatalf("Error parsing UpdatedOn time: %v", err)
+		}
+		apple.Exec("INSERT INTO products (id, name, description, price, sku, created_on, updated_on) VALUES ($1, $2, $3, $4, $5, $6, $7)",
+			prod.ID, prod.Name, prod.Description, prod.Price, prod.SKU, createdOn, updatedOn)
+
 	}
 }
 
