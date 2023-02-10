@@ -13,8 +13,8 @@ type Product struct {
 	Description string  `json:"description"`
 	Price       float32 `json:"price"`
 	SKU         string  `json:"sku"`
-	CreatedOn   string  `json:"-"`
-	UpdatedOn   string  `json:"-"`
+	CreatedOn   string  `json:"created_on"`
+	UpdatedOn   string  `json:"updated_on"`
 	DeletedOn   string  `json:"-"`
 }
 

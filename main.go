@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"database/sql"
 	"log"
 	"main/work/data"
@@ -52,25 +51,28 @@ func main() {
 	router.GET("/products", ph.GetProducts)
 	router.POST("/products", ph.AddProduct)
 	router.PUT("/products/:id", ph.UpdateProduct)
+	log.Fatal(http.ListenAndServe(":8080", router))
 	//sm := http.NewServeMux()
 	//sm.Handle("/", ph)
 
-	s := &http.Server{
-		Addr: ":9000",
-		//Handler:      sm,
-		IdleTimeout:  120 * time.Second,
-		ReadTimeout:  1 * time.Second,
-		WriteTimeout: 1 * time.Second,
-	}
-
-	log.Println("WebServer started successfully")
-	//http.ListenAndServe(":9000", sm)
-	go func() {
-		err := s.ListenAndServe()
-		if err != nil {
-			l.Fatal(err)
+	/*
+		s := &http.Server{
+			Addr: ":9000",
+			//Handler:      sm,
+			IdleTimeout:  120 * time.Second,
+			ReadTimeout:  1 * time.Second,
+			WriteTimeout: 1 * time.Second,
 		}
-	}()
+
+		log.Println("WebServer started successfully")
+		//http.ListenAndServe(":9000", sm)
+		go func() {
+			err := s.ListenAndServe()
+			if err != nil {
+				l.Fatal(err)
+			}
+		}()
+	*/
 
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt)
@@ -78,9 +80,9 @@ func main() {
 
 	sig := <-sigChan
 	l.Println("Received terminate, gracefully shuttingdown.\n Signal Type: ", sig)
-	tc, cf := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cf()
-	s.Shutdown(tc)
+	//tc, cf := context.WithTimeout(context.Background(), 30*time.Second)
+	//defer cf()
+	//s.Shutdown(tc)
 }
 
 func initDatabase() (*sql.DB, error) {

@@ -5,7 +5,7 @@ import (
 	"log"
 	"main/work/data"
 	"net/http"
-	"regexp"
+
 	"strconv"
 	"time"
 
@@ -31,7 +31,7 @@ func NewProducts(l *log.Logger, db *sql.DB) *Products {
 			http.Error(rw, "Unable to marshal json", http.StatusInternalServerError)
 		}
 	}
-*/
+
 func (p *Products) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
 		//p.getProducts(rw, r)
@@ -75,6 +75,7 @@ func (p *Products) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	//catch rest
 	rw.WriteHeader(http.StatusMethodNotAllowed)
 }
+*/
 
 func (p *Products) GetProducts(rw http.ResponseWriter, hr *http.Request, _ httprouter.Params) {
 	// Log a message indicating that a GET request for products was received
@@ -101,6 +102,7 @@ func (p *Products) AddProduct(rw http.ResponseWriter, r *http.Request, _ httprou
 
 	// Attempt to unmarshal the request body into the product object
 	err := prod.FromJSON(r.Body)
+	defer r.Body.Close()
 
 	// If an error occurs during the unmarshaling, return a 400 Bad Request response
 	if err != nil {
@@ -119,9 +121,8 @@ func (p *Products) AddProduct(rw http.ResponseWriter, r *http.Request, _ httprou
 		if err != nil {
 			log.Fatalf("Error parsing UpdatedOn time: %v", err)
 		}
-		apple.Exec("INSERT INTO products (id, name, description, price, sku, created_on, updated_on) VALUES ($1, $2, $3, $4, $5, $6, $7)",
+		apple.Exec("INSERT INTO products (id, name,  description, price, sku, created_on, updated_on) VALUES ($1, $2, $3, $4, $5, $6, $7)",
 			prod.ID, prod.Name, prod.Description, prod.Price, prod.SKU, createdOn, updatedOn)
-
 	}
 }
 
